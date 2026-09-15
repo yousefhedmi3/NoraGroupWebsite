@@ -5,7 +5,6 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { Cairo, Inter, Noto_Sans_Hebrew } from 'next/font/google';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
-import { CookieNotice } from '@/components/ui/CookieNotice';
 import { FloatingWhatsApp } from '@/components/ui/FloatingWhatsApp';
 import { SiteProvider } from '@/components/providers/SiteProvider';
 import { toChrome } from '@/lib/content/chrome';
@@ -34,7 +33,7 @@ const notoHebrew = Noto_Sans_Hebrew({
 });
 
 const cairo = Cairo({
-  subsets: ['arabic', 'latin'],
+  subsets: ['arabic'],
   variable: '--font-cairo',
   display: 'swap',
   weight: ['300', '400', '600', '700'],
@@ -91,14 +90,14 @@ export default async function LocaleLayout({
     locale === 'he'
       ? `${inter.variable} ${notoHebrew.variable}`
       : locale === 'ar'
-        ? `${inter.variable} ${cairo.variable}`
+        ? cairo.variable
         : inter.variable;
 
   return (
     <html
       lang={LOCALE_META[locale].htmlLang}
       dir={dir}
-      className={`${fontClass}${locale === 'ar' ? ' font-arabic' : locale === 'he' ? ' font-hebrew' : ''}`}
+      className={fontClass}
     >
       <body className="min-h-screen overflow-x-hidden">
         <NextIntlClientProvider messages={messages}>
@@ -106,7 +105,6 @@ export default async function LocaleLayout({
             <Header />
             <main className="min-h-screen">{children}</main>
             <Footer />
-            <CookieNotice />
             <FloatingWhatsApp />
           </SiteProvider>
         </NextIntlClientProvider>

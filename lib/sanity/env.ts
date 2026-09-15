@@ -5,8 +5,7 @@
 
 export function getSanityProjectId(): string | undefined {
   const id = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID?.trim();
-  if (!id || id === 'placeholder') return undefined;
-  return id;
+  return id || undefined;
 }
 
 export function getSanityDataset(): string {

@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import { ArrowRight, ArrowUpRight, BookOpen, Sparkles } from 'lucide-react';
 import { Link } from '@/i18n/navigation';

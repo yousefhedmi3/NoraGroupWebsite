@@ -7,7 +7,6 @@ import { BrandLockup } from '@/components/layout/BrandLockup';
 import { useSite } from '@/components/providers/SiteProvider';
 import { LAZACORE, LOCALES, LOCALE_META } from '@/lib/constants';
 import { getMailtoLink, getWhatsAppLink } from '@/lib/contact';
-import { logoSrc, mediaSrc } from '@/lib/content/media';
 import { t } from '@/lib/i18n/locale';
 import { getSiteNavLinks } from '@/lib/nav';
 
@@ -17,7 +16,8 @@ export function Footer() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const logo = logoSrc(settings.logoDarkUrl || settings.logoUrl);
+  // تعيين مسار الشعار الجديد بحرف N المباشر من مجلد public
+  const logo = '/logo-N.png';
 
   const navLinks = getSiteNavLinks(nav, {
     showMaterials: chrome.showMaterials,
@@ -173,7 +173,7 @@ export function Footer() {
           <div className="mt-5 flex flex-col items-start gap-2">
             <div className="overflow-hidden rounded-xl border border-gold-500/30 bg-white/95 p-2 shadow-lg backdrop-blur-md transition-transform duration-300 hover:scale-105">
               <Image
-                src={mediaSrc(settings.qrUrl, '/qr.jpg')}
+                src="/qr.jpg"
                 alt="WhatsApp QR Code"
                 width={100}
                 height={100}
@@ -211,22 +211,8 @@ export function Footer() {
 
       {/* الشريط السفلي للحقوق وتوقيع المطور المميز */}
       <div className="border-t border-charcoal-800/80 relative z-10 bg-charcoal-950/80">
-        <div className="container-luxury flex flex-col items-center justify-between gap-4 py-6 text-xs text-warm-50/50 sm:flex-row sm:flex-wrap">
-          <p>
-            © {new Date().getFullYear()} {settings.brandName}. {ui.allRightsReserved}
-          </p>
-
-          <nav aria-label={ui.legalTitle} className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-            <Link href="/privacy" className="transition-colors duration-300 hover:text-gold-300">
-              {ui.privacy}
-            </Link>
-            <Link href="/cookies" className="transition-colors duration-300 hover:text-gold-300">
-              {ui.cookies}
-            </Link>
-            <Link href="/terms" className="transition-colors duration-300 hover:text-gold-300">
-              {ui.terms}
-            </Link>
-          </nav>
+        <div className="container-luxury flex flex-col items-center justify-between gap-4 py-6 text-xs text-warm-50/50 sm:flex-row">
+          <p>© {new Date().getFullYear()} {settings.brandName}. جميع الحقوق محفوظة.</p>
           
           {/* شارة Lazacore الفاخرة المضيئة */}
           <a

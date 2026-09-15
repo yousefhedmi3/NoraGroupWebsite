@@ -14,12 +14,11 @@ const Studio = dynamic(() => import('./Studio'), {
         minHeight: '100vh',
         display: 'grid',
         placeItems: 'center',
-        fontFamily: 'Cairo, system-ui, sans-serif',
-        background: '#0c0c0c',
-        color: '#cda845',
+        fontFamily: 'system-ui, sans-serif',
+        color: '#111',
       }}
     >
-      Nora Group Studio…
+      Loading Nora Group Studio…
     </div>
   ),
 });

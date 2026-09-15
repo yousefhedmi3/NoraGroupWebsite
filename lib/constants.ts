@@ -18,23 +18,8 @@ export const LOCALE_META: Record<
   ru: { label: 'Русский', dir: 'ltr', htmlLang: 'ru' },
 };
 
-function publicSiteUrl(): string {
-  const fallback = 'https://officialnoragroup.com';
-  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  if (!raw) return fallback;
-  try {
-    const url = new URL(raw);
-    const host = url.hostname.toLowerCase();
-    const local = host === 'localhost' || host === '127.0.0.1';
-    if (url.protocol === 'https:') return url.origin;
-    if (url.protocol === 'http:' && local) return url.origin;
-  } catch {
-    /* invalid NEXT_PUBLIC_SITE_URL */
-  }
-  return fallback;
-}
-
-export const SITE_URL = publicSiteUrl();
+export const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://officialnoragroup.com';
 
 /** Flyer defaults — also seeded into Sanity Site settings */
 export const CONTACT_DEFAULTS = {
@@ -44,8 +29,8 @@ export const CONTACT_DEFAULTS = {
   whatsappE164: '972524659510',
   email: 'official.noragroup@gmail.com',
   website: 'https://officialnoragroup.com',
-  logoPath: '/logo.png',
-  logoDarkPath: '/logo.png',
+  logoPath: '/logo.jpg',
+  logoDarkPath: '/logo-dark.jpg',
   qrPath: '/qr.jpg',
 } as const;
 

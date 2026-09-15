@@ -4,7 +4,6 @@ import { REVALIDATE_TAGS } from '@/lib/constants';
 import { client } from '@/sanity/lib/client';
 import { urlForImage } from './image';
 import { isSanityConfigured } from './env';
-import { isSafeSlug } from '@/lib/i18n/locale';
 
 function asLocale(value: Partial<LocalizedString> | undefined, fallback: LocalizedString): LocalizedString {
   return {
@@ -24,95 +23,64 @@ const FETCH_OPTS = (tags: string[]) => ({
   next: { tags, revalidate: 3600 as const },
 });
 
-function settled<T>(result: PromiseSettledResult<T>, label: string): T | null {
-  if (result.status === 'fulfilled') return result.value;
-  console.error(`[fetchSanityContent] ${label} failed; keeping seed for that slice`);
-  return null;
-}
-
 export async function fetchSanityContent(): Promise<SiteContent | null> {
   if (!isSanityConfigured()) return null;
 
-  const [
-    settingsRes,
-    homeRes,
-    aboutRes,
-    howWeWorkRes,
-    contactPageRes,
-    servicesRes,
-    projectsRes,
-    materialsRes,
-    testimonialsRes,
-    blogPostsRes,
-    faqRes,
-    uiDocsRes,
-  ] = await Promise.allSettled([
-    client.fetch(`*[_type == "siteSettings"][0]`, {}, FETCH_OPTS([REVALIDATE_TAGS.siteSettings, REVALIDATE_TAGS.all])),
-    client.fetch(`*[_type == "homePage"][0]`, {}, FETCH_OPTS([REVALIDATE_TAGS.home, REVALIDATE_TAGS.all])),
-    client.fetch(`*[_type == "aboutPage"][0]`, {}, FETCH_OPTS([REVALIDATE_TAGS.pages, REVALIDATE_TAGS.all])),
-    client.fetch(`*[_type == "howWeWorkPage"][0]`, {}, FETCH_OPTS([REVALIDATE_TAGS.pages, REVALIDATE_TAGS.all])),
-    client.fetch(`*[_type == "contactPage"][0]`, {}, FETCH_OPTS([REVALIDATE_TAGS.pages, REVALIDATE_TAGS.all])),
-    client.fetch(
-      `*[_type == "service" && visible != false] | order(order asc){
+  const [settings, home, about, howWeWork, contactPage, services, projects, materials, testimonials, blogPosts, faq, uiDocs] =
+    await Promise.all([
+      client.fetch(`*[_type == "siteSettings"][0]`, {}, FETCH_OPTS([REVALIDATE_TAGS.siteSettings, REVALIDATE_TAGS.all])),
+      client.fetch(`*[_type == "homePage"][0]`, {}, FETCH_OPTS([REVALIDATE_TAGS.home, REVALIDATE_TAGS.all])),
+      client.fetch(`*[_type == "aboutPage"][0]`, {}, FETCH_OPTS([REVALIDATE_TAGS.pages, REVALIDATE_TAGS.all])),
+      client.fetch(`*[_type == "howWeWorkPage"][0]`, {}, FETCH_OPTS([REVALIDATE_TAGS.pages, REVALIDATE_TAGS.all])),
+      client.fetch(`*[_type == "contactPage"][0]`, {}, FETCH_OPTS([REVALIDATE_TAGS.pages, REVALIDATE_TAGS.all])),
+      client.fetch(
+        `*[_type == "service" && visible != false] | order(order asc){
           "slug": slug.current, title, description, features, visible,
           "image": image.asset->url
         }`,
-      {},
-      FETCH_OPTS([REVALIDATE_TAGS.services, REVALIDATE_TAGS.all]),
-    ),
-    client.fetch(
-      `*[_type == "project" && visible != false] | order(order asc){
+        {},
+        FETCH_OPTS([REVALIDATE_TAGS.services, REVALIDATE_TAGS.all]),
+      ),
+      client.fetch(
+        `*[_type == "project" && visible != false] | order(order asc){
           "slug": slug.current, title, description, category, materials, visible,
           "images": gallery[].asset->url
         }`,
-      {},
-      FETCH_OPTS([REVALIDATE_TAGS.projects, REVALIDATE_TAGS.all]),
-    ),
-    client.fetch(
-      `*[_type == "material" && visible != false] | order(order asc){
+        {},
+        FETCH_OPTS([REVALIDATE_TAGS.projects, REVALIDATE_TAGS.all]),
+      ),
+      client.fetch(
+        `*[_type == "material" && visible != false] | order(order asc){
           "slug": slug.current, name, description, characteristics, applications, finishes, visible,
           "image": image.asset->url
         }`,
-      {},
-      FETCH_OPTS([REVALIDATE_TAGS.materials, REVALIDATE_TAGS.all]),
-    ),
-    client.fetch(
-      `*[_type == "testimonial" && visible != false] | order(order asc){
+        {},
+        FETCH_OPTS([REVALIDATE_TAGS.materials, REVALIDATE_TAGS.all]),
+      ),
+      client.fetch(
+        `*[_type == "testimonial" && visible != false] | order(order asc){
           "id": _id, name, rating, review, project, visible
         }`,
-      {},
-      FETCH_OPTS([REVALIDATE_TAGS.testimonials, REVALIDATE_TAGS.all]),
-    ),
-    client.fetch(
-      `*[_type == "blogPost" && visible != false] | order(date desc){
+        {},
+        FETCH_OPTS([REVALIDATE_TAGS.testimonials, REVALIDATE_TAGS.all]),
+      ),
+      client.fetch(
+        `*[_type == "blogPost" && visible != false] | order(date desc){
           "slug": slug.current, title, excerpt, category, author, date, visible,
           "image": image.asset->url
         }`,
-      {},
-      FETCH_OPTS([REVALIDATE_TAGS.blog, REVALIDATE_TAGS.all]),
-    ),
-    client.fetch(
-      `*[_type == "faqItem" && visible != false] | order(order asc){
+        {},
+        FETCH_OPTS([REVALIDATE_TAGS.blog, REVALIDATE_TAGS.all]),
+      ),
+      client.fetch(
+        `*[_type == "faqItem" && visible != false] | order(order asc){
           "id": _id, category, question, answer, visible
         }`,
-      {},
-      FETCH_OPTS([REVALIDATE_TAGS.faq, REVALIDATE_TAGS.all]),
-    ),
-    client.fetch(`*[_type == "uiLabels"]`, {}, FETCH_OPTS([REVALIDATE_TAGS.all])),
-  ]);
-
-  const settings = settled(settingsRes, 'siteSettings');
-  const home = settled(homeRes, 'homePage');
-  const about = settled(aboutRes, 'aboutPage');
-  const howWeWork = settled(howWeWorkRes, 'howWeWorkPage');
-  const contactPage = settled(contactPageRes, 'contactPage');
-  const services = settled(servicesRes, 'services');
-  const projects = settled(projectsRes, 'projects');
-  const materials = settled(materialsRes, 'materials');
-  const testimonials = settled(testimonialsRes, 'testimonials');
-  const blogPosts = settled(blogPostsRes, 'blogPosts');
-  const faq = settled(faqRes, 'faq');
-  const uiDocs = settled(uiDocsRes, 'uiLabels');
+        {},
+        FETCH_OPTS([REVALIDATE_TAGS.faq, REVALIDATE_TAGS.all]),
+      ),
+      client.fetch(`*[_type == "uiLabels"]`, {}, FETCH_OPTS([REVALIDATE_TAGS.all])),
+    ]);
 
   const base = structuredClone(seedContent);
 
@@ -232,57 +200,48 @@ export async function fetchSanityContent(): Promise<SiteContent | null> {
   }
 
   if (services?.length) {
-    const mapped = services
-      .map((s: Record<string, unknown>) => ({
-        slug: s.slug as SiteContent['services'][number]['slug'],
-        title: asLocale(s.title as LocalizedString, Lempty()),
-        description: asLocale(s.description as LocalizedString, Lempty()),
-        image: (s.image as string) || imagesFallback(),
-        features: Array.isArray(s.features)
-          ? (s.features as LocalizedString[]).map((f) => asLocale(f, Lempty()))
-          : [],
-        visible: s.visible !== false,
-      }))
-      .filter((s: { slug: string }) => isSafeSlug(s.slug));
-    if (mapped.length) base.services = mapped;
+    base.services = services.map((s: Record<string, unknown>) => ({
+      slug: s.slug as SiteContent['services'][number]['slug'],
+      title: asLocale(s.title as LocalizedString, Lempty()),
+      description: asLocale(s.description as LocalizedString, Lempty()),
+      image: (s.image as string) || imagesFallback(),
+      features: Array.isArray(s.features)
+        ? (s.features as LocalizedString[]).map((f) => asLocale(f, Lempty()))
+        : [],
+      visible: s.visible !== false,
+    }));
   }
 
   if (projects?.length) {
-    const mapped = projects
-      .map((p: Record<string, unknown>) => ({
-        slug: String(p.slug),
-        title: asLocale(p.title as LocalizedString, Lempty()),
-        description: asLocale(p.description as LocalizedString, Lempty()),
-        category: p.category as SiteContent['projects'][number]['category'],
-        images: Array.isArray(p.images) && p.images.length ? (p.images as string[]) : [imagesFallback()],
-        materials: Array.isArray(p.materials) ? (p.materials as string[]) : [],
-        visible: p.visible !== false,
-      }))
-      .filter((p: { slug: string }) => isSafeSlug(p.slug));
-    if (mapped.length) base.projects = mapped;
+    base.projects = projects.map((p: Record<string, unknown>) => ({
+      slug: String(p.slug),
+      title: asLocale(p.title as LocalizedString, Lempty()),
+      description: asLocale(p.description as LocalizedString, Lempty()),
+      category: p.category as SiteContent['projects'][number]['category'],
+      images: Array.isArray(p.images) && p.images.length ? (p.images as string[]) : [imagesFallback()],
+      materials: Array.isArray(p.materials) ? (p.materials as string[]) : [],
+      visible: p.visible !== false,
+    }));
   }
 
   if (materials?.length) {
-    const mapped = materials
-      .map((m: Record<string, unknown>) => ({
-        slug: String(m.slug),
-        name: asLocale(m.name as LocalizedString, Lempty()),
-        description: asLocale(m.description as LocalizedString, Lempty()),
-        characteristics: asLocale(m.characteristics as LocalizedString, Lempty()),
-        applications: asLocale(m.applications as LocalizedString, Lempty()),
-        finishes: asLocale(m.finishes as LocalizedString, Lempty()),
-        image: (m.image as string) || imagesFallback(),
-        visible: m.visible !== false,
-      }))
-      .filter((m: { slug: string }) => isSafeSlug(m.slug));
-    if (mapped.length) base.materials = mapped;
+    base.materials = materials.map((m: Record<string, unknown>) => ({
+      slug: String(m.slug),
+      name: asLocale(m.name as LocalizedString, Lempty()),
+      description: asLocale(m.description as LocalizedString, Lempty()),
+      characteristics: asLocale(m.characteristics as LocalizedString, Lempty()),
+      applications: asLocale(m.applications as LocalizedString, Lempty()),
+      finishes: asLocale(m.finishes as LocalizedString, Lempty()),
+      image: (m.image as string) || imagesFallback(),
+      visible: m.visible !== false,
+    }));
   }
 
   if (testimonials?.length) {
     base.testimonials = testimonials.map((t: Record<string, unknown>) => ({
       id: String(t.id),
       name: String(t.name || ''),
-      rating: Math.min(5, Math.max(1, Number(t.rating) || 5)),
+      rating: Number(t.rating || 5),
       review: asLocale(t.review as LocalizedString, Lempty()),
       project: asLocale(t.project as LocalizedString, Lempty()),
       visible: t.visible !== false,
@@ -290,20 +249,17 @@ export async function fetchSanityContent(): Promise<SiteContent | null> {
   }
 
   if (blogPosts?.length) {
-    const mapped = blogPosts
-      .map((b: Record<string, unknown>) => ({
-        slug: String(b.slug),
-        title: asLocale(b.title as LocalizedString, Lempty()),
-        excerpt: asLocale(b.excerpt as LocalizedString, Lempty()),
-        content: Lempty(),
-        category: String(b.category || ''),
-        author: String(b.author || 'Nora Group'),
-        date: String(b.date || ''),
-        image: (b.image as string) || imagesFallback(),
-        visible: b.visible !== false,
-      }))
-      .filter((b: { slug: string }) => isSafeSlug(b.slug));
-    if (mapped.length) base.blogPosts = mapped;
+    base.blogPosts = blogPosts.map((b: Record<string, unknown>) => ({
+      slug: String(b.slug),
+      title: asLocale(b.title as LocalizedString, Lempty()),
+      excerpt: asLocale(b.excerpt as LocalizedString, Lempty()),
+      content: Lempty(),
+      category: String(b.category || ''),
+      author: String(b.author || 'Nora Group'),
+      date: String(b.date || ''),
+      image: (b.image as string) || imagesFallback(),
+      visible: b.visible !== false,
+    }));
   }
 
   if (faq?.length) {
@@ -354,14 +310,7 @@ export async function fetchSanityContent(): Promise<SiteContent | null> {
         notFoundBody: doc.notFoundBody || base.ui[locale].notFoundBody,
         relatedProjects: doc.relatedProjects || base.ui[locale].relatedProjects,
         madeBy: base.ui[locale].madeBy,
-        allRightsReserved: base.ui[locale].allRightsReserved,
         demoNotice: base.ui[locale].demoNotice,
-        privacy: base.ui[locale].privacy,
-        cookies: base.ui[locale].cookies,
-        terms: base.ui[locale].terms,
-        cookieNotice: base.ui[locale].cookieNotice,
-        cookieAccept: base.ui[locale].cookieAccept,
-        legalTitle: base.ui[locale].legalTitle,
       };
     }
   }
@@ -370,7 +319,7 @@ export async function fetchSanityContent(): Promise<SiteContent | null> {
 }
 
 export async function fetchBlogPostContent(slug: string): Promise<LocalizedString | null> {
-  if (!isSanityConfigured() || !isSafeSlug(slug)) return null;
+  if (!isSanityConfigured()) return null;
   const doc = await client.fetch(
     `*[_type == "blogPost" && slug.current == $slug && visible != false][0]{ content }`,
     { slug },

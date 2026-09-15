@@ -154,18 +154,6 @@ export interface FaqItem {
   visible: boolean;
 }
 
-export interface LegalSection {
-  heading: LocalizedString;
-  body: LocalizedString;
-}
-
-export interface LegalPage {
-  title: LocalizedString;
-  updated: LocalizedString;
-  intro: LocalizedString;
-  sections: LegalSection[];
-}
-
 export interface SiteContent {
   settings: SiteSettings;
   nav: Record<AppLocale, NavLabels>;
@@ -180,11 +168,6 @@ export interface SiteContent {
   testimonials: TestimonialItem[];
   blogPosts: BlogPostItem[];
   faq: FaqItem[];
-  legal: {
-    privacy: LegalPage;
-    cookies: LegalPage;
-    terms: LegalPage;
-  };
   ui: Record<
     AppLocale,
     {
@@ -195,17 +178,10 @@ export interface SiteContent {
       contactTitle: string;
       languagesTitle: string;
       madeBy: string;
-      allRightsReserved: string;
       notFoundTitle: string;
       notFoundBody: string;
       relatedProjects: string;
       demoNotice: string;
-      privacy: string;
-      cookies: string;
-      terms: string;
-      cookieNotice: string;
-      cookieAccept: string;
-      legalTitle: string;
     }
   >;
 }

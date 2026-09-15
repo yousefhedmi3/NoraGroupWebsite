@@ -1,3 +1,5 @@
+'use client';
+
 import { Quote, Star } from 'lucide-react';
 import { PageHero } from '@/components/ui/PageHero';
 import { Reveal } from '@/components/ui/Reveal';

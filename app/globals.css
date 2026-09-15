@@ -14,32 +14,21 @@
   body {
     @apply bg-amber-50 text-charcoal-900 font-sans antialiased;
     text-rendering: optimizeLegibility;
+    background: fixed;
   }
 
-  /* Language-specific fonts, with Inter for Latin / Cyrillic mixed strings */
-  html[lang='ar'] body,
-  html[lang='ar'] h1,
-  html[lang='ar'] h2,
-  html[lang='ar'] h3,
-  html[lang='ar'] h4,
-  html[lang='ar'] h5,
-  html[lang='ar'] h6 {
-    font-family: var(--font-cairo), var(--font-inter), system-ui, sans-serif;
+  /* Language-specific fonts */
+  html[lang='ar'] body {
+    font-family: var(--font-cairo), sans-serif;
   }
 
-  html[lang='he'] body,
-  html[lang='he'] h1,
-  html[lang='he'] h2,
-  html[lang='he'] h3,
-  html[lang='he'] h4,
-  html[lang='he'] h5,
-  html[lang='he'] h6 {
-    font-family: var(--font-noto-hebrew), var(--font-inter), system-ui, sans-serif;
+  html[lang='he'] body {
+    font-family: var(--font-noto-hebrew), sans-serif;
   }
 
   html[lang='en'] body,
   html[lang='ru'] body {
-    font-family: var(--font-inter), system-ui, sans-serif;
+    font-family: var(--font-inter), sans-serif;
   }
 
   h1,

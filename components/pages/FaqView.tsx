@@ -1,3 +1,5 @@
+'use client';
+
 import { ChevronDown, HelpCircle } from 'lucide-react';
 import { PageHero } from '@/components/ui/PageHero';
 import { Reveal } from '@/components/ui/Reveal';

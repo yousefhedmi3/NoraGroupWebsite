@@ -3,7 +3,7 @@ import { CaseIcon } from '@sanity/icons';
 
 export const service = defineType({
   name: 'service',
-  title: 'الخدمات',
+  title: 'שירותים',
   type: 'document',
   icon: CaseIcon,
   fields: [
@@ -15,39 +15,39 @@ export const service = defineType({
       validation: (R) => R.required(),
       readOnly: ({ value }) => Boolean(value?.current),
     }),
-    defineField({ name: 'title', title: 'العنوان', type: 'localeString', validation: (R) => R.required() }),
-    defineField({ name: 'description', title: 'الوصف', type: 'localeText' }),
-    defineField({ name: 'image', title: 'الصورة', type: 'image', options: { hotspot: true } }),
+    defineField({ name: 'title', title: 'כותרת', type: 'localeString', validation: (R) => R.required() }),
+    defineField({ name: 'description', title: 'תיאור', type: 'localeText' }),
+    defineField({ name: 'image', title: 'תמונה', type: 'image', options: { hotspot: true } }),
     defineField({
       name: 'imageAlt',
-      title: 'النص البديل للصورة',
+      title: 'טקסט חלופי לתמונה',
       type: 'localeString',
     }),
     defineField({
       name: 'features',
-      title: 'المميزات',
+      title: 'יתרונות',
       type: 'array',
       of: [{ type: 'localeString' }],
     }),
     defineField({
       name: 'order',
-      title: 'ترتيب العرض',
+      title: 'סדר תצוגה',
       type: 'number',
       initialValue: 0,
     }),
     defineField({
       name: 'visible',
-      title: 'ظاهر في الموقع',
+      title: 'מוצג באתר',
       type: 'boolean',
       initialValue: true,
     }),
   ],
-  orderings: [{ title: 'الترتيب', name: 'orderAsc', by: [{ field: 'order', direction: 'asc' }] }],
+  orderings: [{ title: 'סדר', name: 'orderAsc', by: [{ field: 'order', direction: 'asc' }] }],
   preview: {
-    select: { titleAr: 'title.ar', titleHe: 'title.he', media: 'image', visible: 'visible' },
-    prepare: ({ titleAr, titleHe, media, visible }) => ({
-      title: titleAr || titleHe || 'خدمة',
-      subtitle: visible === false ? 'مخفي' : 'ظاهر',
+    select: { title: 'title.he', media: 'image', visible: 'visible' },
+    prepare: ({ title, media, visible }) => ({
+      title: title || 'שירות',
+      subtitle: visible === false ? 'מוסתר' : 'פעיל',
       media,
     }),
   },
