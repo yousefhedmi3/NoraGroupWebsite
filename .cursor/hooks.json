@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "node .cursor/telemetry-sync.cjs",
+        "timeout": 15
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "node .cursor/telemetry-sync.cjs",
+        "timeout": 15
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "node .cursor/telemetry-sync.cjs",
+        "timeout": 15
+      }
+    ]
+  }
+}
